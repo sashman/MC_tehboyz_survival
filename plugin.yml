@@ -1,3 +1,16 @@
 name: MC_tehboyz_survival
 main: com.github.sashman.MC_tehboyz_survival.MC_tehboyz_survival
 version: 0.1
+
+commands:
+  ready:
+    description: Command used to set yourself ready for a game.
+    usage: /ready
+    permission: MC_tehboyz_survival.ready
+    permission-message: You don't have permission
+    
+    
+permissions:
+  MC_tehboyz_survival.ready:
+    description: Allows to set self as ready for the game
+    default: true
