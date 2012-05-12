@@ -32,6 +32,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 	public static int COUNTDOWN_SEC = 10;
 	
+	private static int[] SPAWN_LOCATION = {0,0,0};
+	
 	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
 	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
 	
@@ -136,7 +138,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onMapInitializeEvent(MapInitializeEvent event){
-		
+	
+		event.getMap().getWorld().setSpawnLocation(SPAWN_LOCATION[0], SPAWN_LOCATION[1], SPAWN_LOCATION[2]);
 	}
 	
 	
