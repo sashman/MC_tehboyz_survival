@@ -28,10 +28,12 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	public static enum GameState {Lobby, PreGame, Game};
 	private GameState current_state = GameState.Lobby;
 	
-	public static int MAX_PLAYERS = 2;
+	public static int MAX_PLAYERS = 1;
+	
+	public static int COUNTDOWN_SEC = 10;
 	
 	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
-	public static String game_start_msg = "Game will start shortly!";
+	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
 	
 	
 	/**
@@ -87,6 +89,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 							player.sendMessage(ChatColor.AQUA + game_start_msg);
 						}
 						current_state = GameState.PreGame;
+						dispatchCounter();
 					}
 
 				}
@@ -106,6 +109,31 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		return false;
 	}
 	
+	private void dispatchCounter() {
+
+		/* Start new thread used for the game countdown */
+		this.getServer().getScheduler()
+				.scheduleSyncDelayedTask(this, new Runnable() {
+					public void run() {
+
+						int count = COUNTDOWN_SEC;
+						while (count > 0) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							getServer().broadcastMessage(ChatColor.AQUA + "" + count-- + " sec left");
+
+						}
+						getServer().broadcastMessage(ChatColor.AQUA + "Game has began!");
+						current_state = GameState.Game;
+						GameStartEvent event = new GameStartEvent("Game started");
+						getServer().getPluginManager().callEvent(event);
+					}
+				}, 40L);
+	}
+	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onMapInitializeEvent(MapInitializeEvent event){
 		
@@ -117,10 +145,22 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
     }
 	
+	private void teleportPlayers(){
+		
+	}
+	
+	@EventHandler(priority = EventPriority.HIGH)
+    public void onGameStart(GameStartEvent event) {
+		
+		teleportPlayers();
+		
+    }
+	
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		switch (current_state) {
 		case Lobby:
+		case PreGame:
 			
 			/* Creative mode for every newly joined player  */
 			Player player = event.getPlayer(); 
@@ -145,6 +185,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		/* Disallow world editing in lobby state*/
 		switch (current_state) {
 		case Lobby:
+		case PreGame:
 			event.setCancelled(true);
 			break;
 		default:
@@ -157,6 +198,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		/* Disallow world editing in lobby state*/
 		switch (current_state) {
 		case Lobby:
+		case PreGame:
 			event.setCancelled(true);
 			break;
 		default:
