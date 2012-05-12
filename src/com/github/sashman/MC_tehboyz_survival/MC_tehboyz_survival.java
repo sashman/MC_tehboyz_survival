@@ -75,16 +75,18 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 							.getPlayers();
 					if (!players_playing.contains((Player) sender)) {
 						players_playing.add((Player) sender);
-						broadcast_msg(players,  ((Player) sender).getName()								+ " is ready to play! ("
+						broadcast_msg(players,  ((Player) sender).getName()								
+								+ " is ready to play! ("
 								+ players_playing.size() + "/"
 								+ MAX_PLAYERS + ")");
 					}
 
-					/* If enough players are ready, start the game */
+					/* If enough players are ready, start the game, change to PreGame state*/
 					if (players_playing.size() >= MAX_PLAYERS) {
 						for (Player player : players) {
 							player.sendMessage(ChatColor.AQUA + game_start_msg);
 						}
+						current_state = GameState.PreGame;
 					}
 
 				}
@@ -120,11 +122,9 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		switch (current_state) {
 		case Lobby:
 			
-			/* Creative mode every joined player  */
+			/* Creative mode for every newly joined player  */
 			Player player = event.getPlayer(); 
 	        player.sendMessage(ChatColor.AQUA + welcome_msg);
-	        player.setHealth(player.getMaxHealth());
-	        player.setFoodLevel(player.getMaxHealth());
 	        player.setGameMode(GameMode.CREATIVE);
 			
 			break;
