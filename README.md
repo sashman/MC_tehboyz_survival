@@ -3,11 +3,17 @@ MC_tehboyz_survival
 
 Minecraft mod featuring game play mechanics in the style of Battle Royale
 
+##### DONE
+
+* Cap server to a specified number of participating players
+* Once all players send **/ready** message, change state
+* Start in invicibility stage, countdown for x seconds of invincibility
+* Before game has began, no one is allowed to place/break blocks
+
 ##### TODO
 
-* Cap server to a specified number of players UNICODETICKLOL
-* Once all players send **/ready** message, change state
-* Start in invicibility stage, countdown for 30 seconds of invincibility
+* Put bounds on world
+* Decrease the size of the world every day (or time period) 
 * Teleport players in spread locations using a spread algorithm
 * Put players in vulnerable state after invincibility timer is up
 * Allow block placing, desctruction, etc.
