@@ -34,6 +34,11 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 	private static int[] SPAWN_LOCATION = {0,0,0};
 	
+	//how far from the centre the players will be teleported
+	private static int TELEPORT_RADIUS = 10;
+	//radain difference between each player
+	private static float TELEPORT_RADIAN_OFFSET = (float) (MAX_PLAYERS/(Math.PI*2));
+	
 	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
 	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
 	

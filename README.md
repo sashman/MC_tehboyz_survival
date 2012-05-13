@@ -17,6 +17,7 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 * Teleport players in spread locations using a spread algorithm
 * Put players in vulnerable state after invincibility timer is up
 * Allow block placing, desctruction, etc.
+* Make a config file, specifying number of participants etc.
 * Spectators are invisible, other crap to be decided.
 
 ###### States
