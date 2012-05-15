@@ -146,7 +146,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 						
 						/* Start game after countdown */
 						getServer().broadcastMessage(ChatColor.AQUA + "Game has began!");
-						current_state = GameState.Game;
+						
 						GameStartEvent event = new GameStartEvent("Game started");
 						getServer().getPluginManager().callEvent(event);
 					}
@@ -183,13 +183,14 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 			player.setGameMode(GameMode.SURVIVAL);
 			player.setHealth(player.getMaxHealth());
 			player.setFoodLevel(player.getMaxHealth());
+			player.getInventory().clear();
 		}
 		
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH)
     public void onGameStart(GameStartEvent event) {
-		
+		current_state = GameState.Game;
 		teleportPlayers();
 		
     }
