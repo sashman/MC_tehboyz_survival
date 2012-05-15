@@ -59,11 +59,28 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		
 		Config.readFile(this);
+		startDayKeeper(); // Probably needs to be moved to a more sane starting location.
 	}
-	
-	
-	
-	
+
+
+	// Perhaps enable/disable this on state change. Only runs every 10 seconds though ...
+	private void startDayKeeper() {
+		final MC_tehboyz_survival ref_this = this;
+		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
+				new Runnable(){
+					@Override
+					public void run() {
+						if(ref_this.getState() == GameState.Lobby && ref_this.getServer().getWorlds().get(0).getTime() > 8000){ //World 0? Is this the right world?
+							ref_this.getServer().getWorlds().get(0).setTime(6000);
+						}
+					}
+				},
+				60L, 200L);
+	}
+
+
+
+
 	public void onDisable(){ 
 
 	}
@@ -221,6 +238,10 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		default:
 			break;
 		}
+	}
+	
+	public GameState getState(){
+		return current_state;
 	}
 	
 }
