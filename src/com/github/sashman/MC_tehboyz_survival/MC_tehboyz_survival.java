@@ -40,7 +40,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	private static int[] SPAWN_LOCATION = {0,0,0};
 	
 	//how far from the centre the players will be teleported
-	private static int TELEPORT_RADIUS = 30;
+	private static int TELEPORT_RADIUS = 300;
 	//radain difference between each player
 	private static float TELEPORT_RADIAN_OFFSET = (float) ((Math.PI*2)/MAX_PLAYERS);
 	
