@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -34,14 +35,14 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	public static int WORLD_SIZE = 2048; //TODO Not a scoob what a decent default value is.
 	public static int BOUNDS_CHANGE_TIME = 10; // In mins?
 	
-	public static int COUNTDOWN_SEC = 10;
+	public static int COUNTDOWN_SEC = 5;
 	
 	private static int[] SPAWN_LOCATION = {0,0,0};
 	
 	//how far from the centre the players will be teleported
-	private static int TELEPORT_RADIUS = 10;
+	private static int TELEPORT_RADIUS = 30;
 	//radain difference between each player
-	private static float TELEPORT_RADIAN_OFFSET = (float) (MAX_PLAYERS/(Math.PI*2));
+	private static float TELEPORT_RADIAN_OFFSET = (float) ((Math.PI*2)/MAX_PLAYERS);
 	
 	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
 	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
@@ -59,6 +60,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		
 		Config.readFile(this);
+		
 	}
 	
 	
@@ -68,11 +70,10 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	}
 	
-	private void broadcast_msg(List<Player> players, String msg){
-		for (Player player : players) {
-			player.sendMessage(ChatColor.AQUA
-					+ msg);
-		}
+	private void broadcast_msg(String msg){
+		
+		getServer().broadcastMessage(ChatColor.AQUA
+				+ msg);
 	}
 	
 	
@@ -93,7 +94,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 							.getPlayers();
 					if (!players_playing.contains((Player) sender)) {
 						players_playing.add((Player) sender);
-						broadcast_msg(players,  ((Player) sender).getName()								
+						broadcast_msg(((Player) sender).getName()								
 								+ " is ready to play! ("
 								+ players_playing.size() + "/"
 								+ MAX_PLAYERS + ")");
@@ -133,7 +134,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 					public void run() {
 
 						int count = COUNTDOWN_SEC;
-						while (count > 0) {
+						while (count >= 0) {
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException e) {
@@ -142,6 +143,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 							getServer().broadcastMessage(ChatColor.AQUA + "" + count-- + " sec left");
 
 						}
+						
+						/* Start game after countdown */
 						getServer().broadcastMessage(ChatColor.AQUA + "Game has began!");
 						current_state = GameState.Game;
 						GameStartEvent event = new GameStartEvent("Game started");
@@ -163,6 +166,24 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
     }
 	
 	private void teleportPlayers(){
+		
+		TELEPORT_RADIAN_OFFSET = (float) ((Math.PI*2)/players_playing.size());
+		
+		int i = 0;
+		for (Player player : players_playing) {
+			
+			//location for the player
+			int x = (int) (Math.cos(TELEPORT_RADIAN_OFFSET*i) * TELEPORT_RADIUS + SPAWN_LOCATION[0]);
+			int z = (int) (Math.sin(TELEPORT_RADIAN_OFFSET*i) * TELEPORT_RADIUS + SPAWN_LOCATION[2]);
+			int y = player.getWorld().getHighestBlockYAt(x,z);
+			
+			player.teleport(new Location(player.getWorld(), x, y, z));
+			log.info(player.getDisplayName() + " " + x + "," + z);
+			i++;
+			player.setGameMode(GameMode.SURVIVAL);
+			player.setHealth(player.getMaxHealth());
+			player.setFoodLevel(player.getMaxHealth());
+		}
 		
 	}
 	
@@ -205,6 +226,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		case PreGame:
 			event.setCancelled(true);
 			break;
+		case Game:
+			event.setCancelled(false);
 		default:
 			break;
 		}
@@ -218,6 +241,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		case PreGame:
 			event.setCancelled(true);
 			break;
+		case Game:
+			event.setCancelled(false);
 		default:
 			break;
 		}
