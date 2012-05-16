@@ -33,6 +33,7 @@ public class WorldBoundChecker implements Runnable{
 				if(l.getX() > top_right.getX()) l.setX(top_right.getX());
 				if(l.getZ() < bottom_left.getZ()) l.setZ(bottom_left.getZ());
 				if(l.getZ() > top_right.getZ()) l.setZ(top_right.getZ());
+
 				l.setY(p.getWorld().getHighestBlockYAt((int)l.getX(), (int)l.getZ()));
 				p.teleport(l);
 			}
