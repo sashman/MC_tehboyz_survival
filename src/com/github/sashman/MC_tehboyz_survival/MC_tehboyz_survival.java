@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,6 +19,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.server.MapInitializeEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -47,6 +49,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
 	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
 	
+	private World world;
 	
 	/**
 	 * List of players actually taking part in the game
@@ -60,23 +63,25 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		
 		Config.readFile(this);
-		startDayKeeper(); // Probably needs to be moved to a more sane starting location.
+		
 		
 	}
 	
-	// Perhaps enable/disable this on state change. Only runs every 10 seconds though ...
+	// Perhaps enable/disable this on state change. Only runs every 10 seconds though ... 
+	// SASH: no, it will run every 10 sec, changed to 1 sec
 		private void startDayKeeper() {
+			
 			final MC_tehboyz_survival ref_this = this;
 			this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
 					new Runnable(){
 						@Override
 						public void run() {
-							if(ref_this.getState() == GameState.Lobby && ref_this.getServer().getWorlds().get(0).getTime() > 8000){ //World 0? Is this the right world?
-								ref_this.getServer().getWorlds().get(0).setTime(6000);
+							if(ref_this.getState() == GameState.Lobby && world.getTime() > 8000){
+								world.setTime(6000);
 							}
 						}
 					},
-					60L, 200L);
+					20L, 20L);
 		}
 
 	
@@ -171,9 +176,18 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onMapInitializeEvent(MapInitializeEvent event){
 	
+		
 		event.getMap().getWorld().setSpawnLocation(SPAWN_LOCATION[0], SPAWN_LOCATION[1], SPAWN_LOCATION[2]);
+		log.info("sdfvsdvsdv");
+		startDayKeeper(); 
 	}
 	
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onWorldLoadEvent(WorldLoadEvent event){
+	
+		world = event.getWorld();
+		startDayKeeper(); 
+	}
 	
 	@EventHandler(priority = EventPriority.HIGH)
     public void highLogin(PlayerLoginEvent event) {
