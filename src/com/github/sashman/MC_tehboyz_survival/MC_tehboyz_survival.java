@@ -178,8 +178,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 		
 		event.getMap().getWorld().setSpawnLocation(SPAWN_LOCATION[0], SPAWN_LOCATION[1], SPAWN_LOCATION[2]);
-		log.info("sdfvsdvsdv");
-		startDayKeeper(); 
+
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH)
