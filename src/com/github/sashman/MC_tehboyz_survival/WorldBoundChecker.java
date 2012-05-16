@@ -45,9 +45,7 @@ public class WorldBoundChecker implements Runnable{
 		double pX = p.getLocation().getX();
 		double pZ = p.getLocation().getZ();
 		
-		if(pX > bottom_left.getX() && pX < top_right.getX() && pZ > bottom_left.getZ() && pZ < top_right.getZ())
-			return true;
-		return false;
+		return (pX > bottom_left.getX() && pX < top_right.getX() && pZ > bottom_left.getZ() && pZ < top_right.getZ());
 	}
 
 }
