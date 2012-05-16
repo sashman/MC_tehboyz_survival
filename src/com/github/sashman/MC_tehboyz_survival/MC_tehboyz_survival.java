@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,15 +27,15 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	public static final String CONFIG_LOCATION = "plugins/survival.config";
 
-	public static enum GameState {
-		Lobby, PreGame, Game
-	};
-
+	
+	
+	public static enum GameState {Lobby, PreGame, Game};
 	private GameState current_state = GameState.Lobby;
 
 	public static int MAX_PLAYERS = 1;
-	public static int WORLD_SIZE = 2048; // TODO Not a scoob what a decent
-											// default value is.
+
+
+	public static int WORLD_SIZE = 1024; //TODO Not a scoob what a decent default value is.
 	public static int BOUNDS_CHANGE_TIME = 10; // In mins?
 
 	public static int COUNTDOWN_SEC = 5;
@@ -67,22 +68,6 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	}
 
-	private void startDayKeeper() {
-
-		final MC_tehboyz_survival ref_this = this;
-
-		this.getServer().getScheduler()
-				.scheduleAsyncRepeatingTask(this, new Runnable() {
-					@Override
-					public void run() {
-						if (ref_this.world != null
-								&& ref_this.getState() == GameState.Lobby
-								&& world.getTime() > 8000) {
-							world.setTime(6000);
-						}
-					}
-				}, 20L, 20L);
-	}
 
 	public void onDisable() {
 
@@ -186,11 +171,30 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	}
 
+	//apparently doesnt happen....
 	@EventHandler(priority = EventPriority.HIGH)
-	public void onWorldLoadEvent(WorldLoadEvent event) {
-
-		world = event.getWorld();
-
+	public void onWorldLoadEvent(WorldLoadEvent event){
+	}
+	
+			private void startDayKeeper() {
+				
+				final MC_tehboyz_survival ref_this = this;
+				this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
+						new Runnable(){
+							@Override
+							public void run() {
+								if(ref_this.world != null && ref_this.getState() == GameState.Lobby && world.getTime() > 8000){
+									world.setTime(6000);
+								}
+							}
+						},
+						20L, 20L);
+			}
+	
+	private void initWorldBounds() {
+		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
+																new WorldBoundChecker(this.getServer(),WORLD_SIZE, WORLD_SIZE),
+																20L, 20L);
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
@@ -231,12 +235,21 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	}
 
+	boolean bounds_set = false;
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 
+		
+		
 		// hack to set the current world
 		if (world == null)
 			world = event.getPlayer().getWorld();
+		
+		//hack to get the bounds set
+		if(!bounds_set){
+			initWorldBounds();
+			bounds_set = true;
+		}
 
 		switch (current_state) {
 		case Lobby:
