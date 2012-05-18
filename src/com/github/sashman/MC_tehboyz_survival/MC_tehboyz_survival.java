@@ -23,6 +23,11 @@ import org.bukkit.event.server.MapInitializeEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * 
+ * @author SASHMAN, HUGH
+ * @version 0.1
+ */
 public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	public static final String CONFIG_LOCATION = "plugins/survival.config";
