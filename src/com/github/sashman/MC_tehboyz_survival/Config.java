@@ -47,7 +47,7 @@ public abstract class Config {
 						if(keyval[0].equals("WORLD_SIZE"))
 							survival.WORLD_SIZE = new Integer(keyval[1]);
 						if(keyval[0].equals("BOUNDS_CHANGE_TIME"))
-							survival.BOUNDS_CHANGE_TIME = new Integer(keyval[1]);
+							survival.BOUNDS_CHANGE_TIME = new Integer(keyval[1]) *60*1000;
 					}else{
 						survival.log.info("Key: '" + keyval[0] + "' not recognised.");
 					}

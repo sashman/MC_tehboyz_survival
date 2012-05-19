@@ -25,44 +25,46 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * 
- * @author SASHMAN, HUGH
+ * @author SASHMAN, HugeCannon
  * @version 0.1
  */
 public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
-	public static final String CONFIG_LOCATION = "plugins/survival.config";
 
-	
-	
-	public static enum GameState {Lobby, PreGame, Game};
-	private GameState current_state = GameState.Lobby;
-
-	public static int MAX_PLAYERS = 1;
-
-
-	public static int WORLD_SIZE = 1024; //TODO Not a scoob what a decent default value is.
-	public static int BOUNDS_CHANGE_TIME = 10; // In mins?
-
-	public static int COUNTDOWN_SEC = 5;
-
-	private static int[] SPAWN_LOCATION = { 0, 0, 0 };
-
-	// how far from the centre the players will be teleported
-	private static int TELEPORT_RADIUS = 300;
-	// radain difference between each player
-	private static float TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS);
-
-	public static String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
-	public static String game_start_msg = "Game will start shortly! Prepare to be teleported...";
-
+	/* Config fields */
+	protected static final String CONFIG_LOCATION = "plugins/survival.config";
+	protected static int MAX_PLAYERS = 1;
 	private World world;
+	Logger log;
+	
+	/* Game state fields */
+	private static enum GameState {Lobby, PreGame, Game};
+	protected GameState current_state = GameState.Lobby;
 
+	/* Spawn + Start of game fields */
+	private static int COUNTDOWN_SEC = 5;
+	private static int[] SPAWN_LOCATION = { 0, 0, 0 };
+	private static int TELEPORT_RADIUS = 300; // how far from the centre the players will be teleported
+	private static float TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS); // radian difference between each player
+	/* Game fields - bounds */
+	protected static int WORLD_SIZE = 512; // 1024 will mean from -512 to 512
+	protected static int BOUNDS_CHANGE_TIME = 1 *60*1000; // In ms 
+	protected static int BOUNDS_CHANGE_AMOUNT = 50; // Blocks reduced per bounds change (x-50 and z-50).
+	protected static int MINIMUM_WORLD_SIZE = 100;
+
+	/* Message fields */
+	private static final String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
+	private static final String game_start_msg = "Game will start shortly! Prepare to be teleported...";
+
+	/* Runnable task IDs */
+	private int lobbyBoundId;
+	private int gameBoundId;
+	
 	/**
 	 * List of players actually taking part in the game
 	 */
 	private ArrayList<Player> players_playing = new ArrayList<Player>();
 
-	Logger log;
 
 	public void onEnable() {
 		log = this.getLogger();
@@ -197,8 +199,8 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 			}
 	
 	private void initWorldBounds() {
-		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
-																new WorldBoundChecker(this.getServer(),WORLD_SIZE, WORLD_SIZE),
+		lobbyBoundId = this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
+																new WorldBoundCheckerLobby(this.getServer(),WORLD_SIZE, WORLD_SIZE),
 																20L, 20L);
 	}
 
@@ -237,6 +239,12 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	public void onGameStart(GameStartEvent event) {
 		current_state = GameState.Game;
 		teleportPlayers();
+		
+		// Kill lobbyBoundChecker
+		this.getServer().getScheduler().cancelTask(lobbyBoundId);
+		gameBoundId =  this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
+				new WorldBoundCheckerGame(this.getServer(),WORLD_SIZE, WORLD_SIZE, BOUNDS_CHANGE_TIME, BOUNDS_CHANGE_AMOUNT, MINIMUM_WORLD_SIZE),
+				20L, 20L);
 
 	}
 
@@ -305,7 +313,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		}
 	}
 
-	public GameState getState() {
+	public synchronized GameState getState(){
 		return current_state;
 	}
 
