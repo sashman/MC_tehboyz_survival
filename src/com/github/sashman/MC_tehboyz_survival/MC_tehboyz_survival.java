@@ -51,7 +51,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	protected static int BOUNDS_CHANGE_TIME = 1 *60*1000; // In ms 
 	protected static int BOUNDS_CHANGE_AMOUNT = 50; // Blocks reduced per bounds change (x-50 and z-50).
 	protected static int MINIMUM_WORLD_SIZE = 100;
-
+	
 	/* Message fields */
 	private static final String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
 	private static final String game_start_msg = "Game will start shortly! Prepare to be teleported...";
