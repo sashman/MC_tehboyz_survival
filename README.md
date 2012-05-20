@@ -15,11 +15,9 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 	* Allow block placing, desctruction, etc.
 	* Make a config file, specifying number of participants etc.
 	* Put bounds on world
+ 	* Decrease the size of the world every day (or time period)
 
 ##### TODO
-
-* Release v0.1
-	* Decrease the size of the world every day (or time period)
 	
 * Release v0.2
 	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
