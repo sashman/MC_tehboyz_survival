@@ -1,5 +1,6 @@
 package com.github.sashman.MC_tehboyz_survival;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -72,11 +73,15 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	private ArrayList<Player> players_playing = new ArrayList<Player>();
 
 
+	
 	public void onEnable() {
+		
 		log = this.getLogger();
+		clear_player_data();
 		getServer().getPluginManager().registerEvents(this, this);
 		
 		readConfig();
+		
 		startDayKeeper();
 
 	}
@@ -106,6 +111,26 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		
 		saveDefaultConfig();
 		
+	}
+	
+	private void clear_player_data() {
+		File dir = new File("world/players");
+		if(dir.exists()) log.info("Clearing players directory");
+		if(deleteDir(dir)) log.info("Cleared successfully");
+	}
+	
+	public boolean deleteDir(File dir) {
+	    if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i=0; i<children.length; i++) {
+	            boolean success = deleteDir(new File(dir, children[i]));
+	            
+	            return success;
+	        }
+	    }
+	    //debug
+	    //log.info(dir.toString());
+	    return dir.delete();
 	}
 
 
