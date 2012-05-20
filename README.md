@@ -3,6 +3,18 @@ MC_tehboyz_survival
 
 Minecraft mod featuring game play mechanics in the style of Battle Royale
 
+### Version v0.1 (sashman, hugecannon)
+
+* Number of participating players is capped to a maximum number in the config file
+* Initially everybody is in creative mode
+* Block placing and creature spawning is disabled until the game starts
+* Once all players send **/ready** message, the game can begin
+* After a short countdown, participants are teleported in spread locations
+* Set participants to survival mode
+* World bounds are present and shrink every set time period
+* A number of game properties are available to be chnaged in the config file
+
+
 ##### DONE
 
 * Release v0.1
