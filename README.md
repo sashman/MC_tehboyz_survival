@@ -14,7 +14,7 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 	* Put players in vulnerable state after invincibility timer is up
 	* Allow block placing, desctruction, etc.
 	* Make a config file, specifying number of participants etc.
-	m* Put bounds on world
+	* Put bounds on world
 
 ##### TODO
 
