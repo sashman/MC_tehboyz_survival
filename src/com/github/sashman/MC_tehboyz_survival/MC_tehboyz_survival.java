@@ -66,12 +66,15 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	private ArrayList<Player> players_playing = new ArrayList<Player>();
 
 
+	
 	public void onEnable() {
+		
 		log = this.getLogger();
+		clear_player_data();
 		getServer().getPluginManager().registerEvents(this, this);
 		
 		readConfig();
-		clear_player_data();
+		
 		startDayKeeper();
 
 	}
@@ -104,20 +107,22 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	}
 	
 	private void clear_player_data() {
-		File dir = new File("../world/players");
-		if(deleteDir(dir)) log.info("Cleared players directory");
+		File dir = new File("world/players");
+		if(dir.exists()) log.info("Clearing players directory");
+		if(deleteDir(dir)) log.info("Cleared successfully");
 	}
 	
-	public static boolean deleteDir(File dir) {
+	public boolean deleteDir(File dir) {
 	    if (dir.isDirectory()) {
 	        String[] children = dir.list();
 	        for (int i=0; i<children.length; i++) {
 	            boolean success = deleteDir(new File(dir, children[i]));
-	            if (!success) {
-	                return false;
-	            }
+	            
+	            return success;
 	        }
 	    }
+	    //debug
+	    //log.info(dir.toString());
 	    return dir.delete();
 	}
 
