@@ -2,6 +2,7 @@ package com.github.sashman.MC_tehboyz_survival;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -11,6 +12,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,32 +31,31 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @version 0.1
  */
 public class MC_tehboyz_survival extends JavaPlugin implements Listener {
-
-
-	/* Config fields */
-	protected static final String CONFIG_LOCATION = "plugins/survival.config";
-	protected static int MAX_PLAYERS = 1;
+	
 	private World world;
 	Logger log;
+	FileConfiguration config;
 	
 	/* Game state fields */
 	private static enum GameState {Lobby, PreGame, Game};
 	protected GameState current_state = GameState.Lobby;
 
 	/* Spawn + Start of game fields */
-	private static int COUNTDOWN_SEC = 5;
-	private static int[] SPAWN_LOCATION = { 0, 0, 0 };
-	private static int TELEPORT_RADIUS = 300; // how far from the centre the players will be teleported
-	private static float TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS); // radian difference between each player
+	protected static int MAX_PLAYERS;
+	private static int TELEPORT_RADIUS; // how far from the centre the players will be teleported
+	private static int COUNTDOWN_SEC;
+	private static int[] SPAWN_LOCATION;
+	private static float TELEPORT_RADIAN_OFFSET; // radian difference between each player
+	
 	/* Game fields - bounds */
-	protected static int WORLD_SIZE = 512; // 1024 will mean from -512 to 512
-	protected static int BOUNDS_CHANGE_TIME = 1 *60*1000; // In ms 
-	protected static int BOUNDS_CHANGE_AMOUNT = 50; // Blocks reduced per bounds change (x-50 and z-50).
-	protected static int MINIMUM_WORLD_SIZE = 100;
+	protected static int WORLD_SIZE;
+	protected static int BOUNDS_CHANGE_TIME;
+	protected static int BOUNDS_CHANGE_AMOUNT;
+	protected static int MINIMUM_WORLD_SIZE;
 	
 	/* Message fields */
-	private static final String welcome_msg = "Welcome to the tehboyz survival mod! Type /ready if you are ready to participate";
-	private static final String game_start_msg = "Game will start shortly! Prepare to be teleported...";
+	private static String WELCOME_MSG;
+	private static String GAME_START_MSG;
 
 	/* Runnable task IDs */
 	private int lobbyBoundId;
@@ -69,10 +70,37 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	public void onEnable() {
 		log = this.getLogger();
 		getServer().getPluginManager().registerEvents(this, this);
-
-		Config.readFile(this);
+		
+		readConfig();
 		startDayKeeper();
 
+	}
+
+
+	private void readConfig() {
+		config = getConfig();
+		
+		// Read values from config file
+		MAX_PLAYERS = config.getInt("max_players");
+		COUNTDOWN_SEC = config.getInt("countdoown_sec");
+		TELEPORT_RADIUS = config.getInt("teleport_radius");
+		WORLD_SIZE = config.getInt("world_size");
+		MINIMUM_WORLD_SIZE = config.getInt("minimum_world_size");
+		
+		List<Integer> spawn_loc = config.getIntegerList("spawn_location");
+		SPAWN_LOCATION = new int[]{spawn_loc.get(0), spawn_loc.get(1), spawn_loc.get(2)};
+		
+		WELCOME_MSG = config.getString("welcome_msg");
+		GAME_START_MSG = config.getString("game_start_msg");
+		
+		BOUNDS_CHANGE_AMOUNT = config.getInt("bounds_change_amount");
+		BOUNDS_CHANGE_TIME = config.getInt("bounds_change_time") *60*1000; // To ms from mins
+		
+		// Set up fields which depend on config values
+		TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS);
+		
+		saveDefaultConfig();
+		
 	}
 
 
@@ -113,7 +141,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 					 */
 					if (players_playing.size() >= MAX_PLAYERS) {
 						for (Player player : players) {
-							player.sendMessage(ChatColor.AQUA + game_start_msg);
+							player.sendMessage(ChatColor.AQUA + GAME_START_MSG);
 						}
 						current_state = GameState.PreGame;
 						dispatchCounter();
@@ -168,6 +196,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 				}, 40L);
 	}
 
+	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onMapInitializeEvent(MapInitializeEvent event) {
 
@@ -181,22 +210,23 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	//apparently doesnt happen....
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onWorldLoadEvent(WorldLoadEvent event){
+		
 	}
-	
-			private void startDayKeeper() {
-				
-				final MC_tehboyz_survival ref_this = this;
-				this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
-						new Runnable(){
-							@Override
-							public void run() {
-								if(ref_this.world != null && ref_this.getState() == GameState.Lobby && world.getTime() > 8000){
-									world.setTime(6000);
-								}
-							}
-						},
-						20L, 20L);
-			}
+
+	private void startDayKeeper() {
+		
+		final MC_tehboyz_survival ref_this = this;
+		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
+				new Runnable(){
+					@Override
+					public void run() {
+						if(ref_this.world != null && ref_this.getState() == GameState.Lobby && world.getTime() > 8000){
+							world.setTime(6000);
+						}
+					}
+				},
+				20L, 20L);
+	}
 	
 	private void initWorldBounds() {
 		lobbyBoundId = this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
@@ -270,7 +300,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 			/* Creative mode for every newly joined player */
 			Player player = event.getPlayer();
-			player.sendMessage(ChatColor.AQUA + welcome_msg);
+			player.sendMessage(ChatColor.AQUA + WELCOME_MSG);
 			player.setGameMode(GameMode.CREATIVE);
 
 			break;

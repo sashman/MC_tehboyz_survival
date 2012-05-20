@@ -45,16 +45,16 @@ public class WorldBoundCheckerGame extends WorldBoundCheckerLobby{
 		if(top_right.getX() > min_world_size && top_right.getZ() > min_world_size){
 			if(getMsTime() - last_change_time > bounds_change_time){
 				if(!warning_sent){
-					Coord newBounds = new Coord(top_right.getX()-bounds_change_amount, top_right.getZ()-bounds_change_amount);
+					Coord newBounds = new Coord(max(min_world_size, top_right.getX()-bounds_change_amount), max(min_world_size, top_right.getZ()-bounds_change_amount));
 					server.broadcastMessage("Bounds changing in 30 seconds. Move to within (x,z): " + newBounds.toString());
 					warning_sent = true;
 				}
 				if(getMsTime() - last_change_time > (bounds_change_time + bounds_change_wait)){ // Waiting period over
 					server.broadcastMessage("You will be teleported inside the bounds if you were outside.");
-					bottom_left.setX(bottom_left.getX() + bounds_change_amount);
-					bottom_left.setZ(bottom_left.getZ() + bounds_change_amount);
-					top_right.setX(top_right.getX() - bounds_change_amount);
-					top_right.setZ(top_right.getZ() - bounds_change_amount);
+					bottom_left.setX(min(min_world_size, bottom_left.getX() + bounds_change_amount));
+					bottom_left.setZ(min(min_world_size, bottom_left.getZ() + bounds_change_amount));
+					top_right.setX(max(min_world_size, top_right.getX() - bounds_change_amount));
+					top_right.setZ(max(min_world_size, top_right.getZ() - bounds_change_amount));
 					server.broadcastMessage("Bounds have changed to:" + top_right.toString() );
 					last_change_time = getMsTime();
 					warning_sent = false;
@@ -67,5 +67,11 @@ public class WorldBoundCheckerGame extends WorldBoundCheckerLobby{
 	private long getMsTime(){
 		return new Date().getTime();
 	}
-
+	
+	private int max(int a, int b){
+		return (a > b)? a : b;
+	}
+	private int min(int a, int b){
+		return (a < b)? a : b;
+	}
 }

@@ -1,0 +1,32 @@
+# default config.yml
+
+## Global ##
+max_players: 6
+world_size: 1024
+teleport_radius: 300 # Min 300, needs to be < 2*world_size
+
+## Bounds ##
+bounds_change_time: 5  # In minutes
+bounds_change_amount: 50 
+
+## Messages ##
+welcome_msg: Welcome to the tehboyz survival mod! Type /ready if you are ready to participate.
+game_start_msg: Game will start shortly! Prepare to be teleported...
+
+
+
+## Do not change these - Changing these values could result in happenings. ##
+
+minimum_world_size: 100
+countdown_sec: 5
+spawn_location: 
+  - 0
+  - 0
+  - 0
+
+
+
+
+
+
+
