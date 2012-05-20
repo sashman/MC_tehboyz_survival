@@ -109,22 +109,22 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 	private void clear_player_data() {
 		File dir = new File("world/players");
-		if(dir.exists()) log.info("Clearing players directory");
-		if(deleteDir(dir)) log.info("Cleared successfully");
+		if(dir.exists()){
+			log.info("Clearing players directory");
+			deleteDirContents(dir);
+			log.info("Cleared successfully");
+		}
 	}
 	
-	public boolean deleteDir(File dir) {
+	public void deleteDirContents(File dir) {
 	    if (dir.isDirectory()) {
 	        String[] children = dir.list();
-	        for (int i=0; i<children.length; i++) {
-	            boolean success = deleteDir(new File(dir, children[i]));
-	            
-	            return success;
+	        for(String file_name: children){
+        		File f = new File(dir.getAbsolutePath() + "/" + file_name);
+        		if(!f.delete())
+        			log.info("Unable to delete player data file: " + file_name);
 	        }
 	    }
-	    //debug
-	    //log.info(dir.toString());
-	    return dir.delete();
 	}
 
 
