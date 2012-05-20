@@ -33,6 +33,10 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 	
 * Release v0.2
 	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
+	* Varying punishments for being outside the bounds
+
+* Release v0.3
+	* Team based games
 
 ###### States
 1. Player lobby stage, players entering
