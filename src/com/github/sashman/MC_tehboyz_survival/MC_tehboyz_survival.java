@@ -16,7 +16,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.server.MapInitializeEvent;
@@ -311,6 +318,17 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	}
 
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void CreatureSpawn(CreatureSpawnEvent event){ 
+		switch(current_state) {
+		case Lobby:  // Cancel spawning of items when in lobby stage
+			event.setCancelled(true);
+			break;
+		default:
+			break;
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onBlockBreak(BlockBreakEvent event) {
 		/* Disallow world editing in lobby state */
