@@ -22,7 +22,7 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 	* Decrease the size of the world every day (or time period)
 	
 * Release v0.2
-	* Spectators
+	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
 
 ###### States
 1. Player lobby stage, players entering
