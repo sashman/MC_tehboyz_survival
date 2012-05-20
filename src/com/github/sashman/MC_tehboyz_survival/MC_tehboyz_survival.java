@@ -222,6 +222,11 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	
 	public void init() {
+		
+		// hack to set the current world
+		if (world == null)
+			world = this.getServer().getWorlds().get(0);
+		
 		world.setSpawnLocation(SPAWN_LOCATION[0], SPAWN_LOCATION[1], SPAWN_LOCATION[2]);
 	}
 
@@ -295,11 +300,6 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 
-		
-		
-		// hack to set the current world
-		if (world == null)
-			world = event.getPlayer().getWorld();
 		
 		//hack to get the bounds set
 		if(!bounds_set){
