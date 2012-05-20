@@ -3,6 +3,18 @@ MC_tehboyz_survival
 
 Minecraft mod featuring game play mechanics in the style of Battle Royale
 
+### Version v0.1 (sashman, hugecannon)
+
+* Number of participating players is capped to a maximum number in the config file
+* Initially everybody is in creative mode
+* Block placing and creature spawning is disabled until the game starts
+* Once all players send **/ready** message, the game can begin
+* After a short countdown, participants are teleported in spread locations
+* Set participants to survival mode
+* World bounds are present and shrink every set time period
+* A number of game properties are available to be chnaged in the config file
+
+
 ##### DONE
 
 * Release v0.1
@@ -15,14 +27,16 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 	* Allow block placing, desctruction, etc.
 	* Make a config file, specifying number of participants etc.
 	* Put bounds on world
+ 	* Decrease the size of the world every day (or time period)
 
 ##### TODO
-
-* Release v0.1
-	* Decrease the size of the world every day (or time period)
 	
 * Release v0.2
 	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
+	* Varying punishments for being outside the bounds
+
+* Release v0.3
+	* Team based games
 
 ###### States
 1. Player lobby stage, players entering
