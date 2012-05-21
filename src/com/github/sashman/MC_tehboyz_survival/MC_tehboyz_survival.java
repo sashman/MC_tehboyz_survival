@@ -86,7 +86,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		
 		// Read values from config file
 		MAX_PLAYERS = config.getInt("max_players");
-		COUNTDOWN_SEC = config.getInt("countdoown_sec");
+		COUNTDOWN_SEC = config.getInt("countdown_sec");
 		TELEPORT_RADIUS = config.getInt("teleport_radius");
 		WORLD_SIZE = config.getInt("world_size");
 		MINIMUM_WORLD_SIZE = config.getInt("minimum_world_size");
