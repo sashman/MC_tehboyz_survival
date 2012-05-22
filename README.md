@@ -34,14 +34,17 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 * Release v0.2
 	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
 	* Varying punishments for being outside the bounds
-        * E.g. Player recieves damage after a warning is given
-        * E.g. High exhaustion
+ 		* Exhaustion rate increased over time?
+   		* Health decreased over time?
+     		* Hunger decreased over time?
 	* Once a player dies, remove him from participants and kick from server
 	* If a player rejoins the server, set him as a spectator
  	* All non-participants are set as spectators when the game starts
 
 * Release v0.3
 	* Team based games
+ 	* Admin/user roles
+  	* Admin commands such as adding players to the 'playing' list (/addplayer [name])
 
 ###### States
 1. Player lobby stage, players entering
