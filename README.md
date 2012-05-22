@@ -34,6 +34,8 @@ Minecraft mod featuring game play mechanics in the style of Battle Royale
 * Release v0.2
 	* Spectators - Perhaps use http://dev.bukkit.org/server-mods/watcher/
 	* Varying punishments for being outside the bounds
+        	* Player recieves damage after a warning is given
+         	* High exhaustion
 	* Once a player dies, remove him from participants and kick from server
 	* If a player rejoins the server, set him as a spectator
  	* All non-participants are set as spectators when the game starts
