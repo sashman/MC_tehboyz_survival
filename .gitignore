@@ -1,5 +1,6 @@
-# Compiled Source #
+# Compiled Source and eclipse stuff #
 *.class
+.settings
 
 # Compiled Jar #
 MC_tehboyz_survival.jar
