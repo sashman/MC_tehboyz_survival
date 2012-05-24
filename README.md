@@ -3,7 +3,7 @@ MC_tehboyz_survival
 
 Minecraft mod featuring game play mechanics in the style of Battle Royale
 
-* ## This plugin deletes player data files inside world/players/ when enabled. You have been warned.
+#### ! This plugin deletes player data files inside world/players/ when enabled. You have been warned. !
 
 ### Version v0.1 (sashman, hugecannon)
 
