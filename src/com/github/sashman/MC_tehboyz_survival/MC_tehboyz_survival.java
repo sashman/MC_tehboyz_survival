@@ -21,8 +21,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.server.MapInitializeEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -38,7 +36,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	
 	/* Game state fields */
 	private static enum GameState {Lobby, PreGame, Game};
-	protected GameState current_state = GameState.Lobby;
+	protected GameState current_state;
 
 	/* Spawn + Start of game fields */
 	protected static int MAX_PLAYERS;
@@ -60,11 +58,13 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 	/* Runnable task IDs */
 	private int lobbyBoundId;
 	private int gameBoundId;
+	private int dayKeeperId;
 	
 	/**
 	 * List of players actually taking part in the game
 	 */
 	private ArrayList<Player> players_playing = new ArrayList<Player>();
+	private ArrayList<Player> spectators = new ArrayList<Player>();
 
 
 	
@@ -73,39 +73,28 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		log = this.getLogger();
 		clear_player_data();
 		getServer().getPluginManager().registerEvents(this, this);
-		
 		readConfig();
+		
+		
 		init();
 		
-		startDayKeeper();
+		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable(){
+
+			@Override
+			public void run() {
+				for(Player p: world.getPlayers()){
+					if(p.getName().equals("HugeCannon") && world.getPlayers().size() > 1){
+						getServer().getPlayer("Player").hidePlayer(p);
+					}
+				}
+				
+			}
+			
+		}, 10, 10);
+		
 	}
 
 
-	private void readConfig() {
-		config = getConfig();
-		
-		// Read values from config file
-		MAX_PLAYERS = config.getInt("max_players");
-		COUNTDOWN_SEC = config.getInt("countdown_sec");
-		TELEPORT_RADIUS = config.getInt("teleport_radius");
-		WORLD_SIZE = config.getInt("world_size");
-		MINIMUM_WORLD_SIZE = config.getInt("minimum_world_size");
-		
-		List<Integer> spawn_loc = config.getIntegerList("spawn_location");
-		SPAWN_LOCATION = new int[]{spawn_loc.get(0), spawn_loc.get(1), spawn_loc.get(2)};
-		
-		WELCOME_MSG = config.getString("welcome_msg");
-		GAME_START_MSG = config.getString("game_start_msg");
-		
-		BOUNDS_CHANGE_AMOUNT = config.getInt("bounds_change_amount");
-		BOUNDS_CHANGE_TIME = config.getInt("bounds_change_time") *60*1000; // To ms from mins
-		
-		// Set up fields which depend on config values
-		TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS);
-		
-		saveDefaultConfig();
-		
-	}
 	
 	private void clear_player_data() {
 		File dir = new File("world/players");
@@ -149,8 +138,6 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 				/* Only player can issue */
 				if (sender instanceof Player) {
-					List<Player> players = ((Player) sender).getWorld()
-							.getPlayers();
 					if (!players_playing.contains((Player) sender)) {
 						players_playing.add((Player) sender);
 						broadcast_msg(((Player) sender).getName()
@@ -163,17 +150,10 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 					 * If enough players are ready, start the game, change to
 					 * PreGame state
 					 */
-					if (players_playing.size() >= MAX_PLAYERS) {
-						for (Player player : players) {
-							player.sendMessage(ChatColor.AQUA + GAME_START_MSG);
-						}
-						current_state = GameState.PreGame;
-						dispatchCounter();
-					}
-
+					if (players_playing.size() >= MAX_PLAYERS)
+						changeState(GameState.PreGame);
 				}
 				return true;
-
 			}
 
 			break;
@@ -188,37 +168,7 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		return false;
 	}
 
-	private void dispatchCounter() {
-
-		/* Start new thread used for the game countdown */
-		this.getServer().getScheduler()
-				.scheduleSyncDelayedTask(this, new Runnable() {
-					public void run() {
-
-						int count = COUNTDOWN_SEC;
-						while (count >= 0) {
-							try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							getServer()
-									.broadcastMessage(
-											ChatColor.AQUA + "" + count--
-													+ " sec left");
-
-						}
-
-						/* Start game after countdown */
-						getServer().broadcastMessage(
-								ChatColor.AQUA + "Game has began!");
-
-						GameStartEvent event = new GameStartEvent(
-								"Game started");
-						getServer().getPluginManager().callEvent(event);
-					}
-				}, 40L);
-	}
+	
 
 	
 	public void init() {
@@ -230,27 +180,6 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 		world.setSpawnLocation(SPAWN_LOCATION[0], SPAWN_LOCATION[1], SPAWN_LOCATION[2]);
 	}
 
-
-	private void startDayKeeper() {
-		
-		final MC_tehboyz_survival ref_this = this;
-		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
-				new Runnable(){
-					@Override
-					public void run() {
-						if(ref_this.world != null && ref_this.getState() == GameState.Lobby && world.getTime() > 8000){
-							world.setTime(6000);
-						}
-					}
-				},
-				20L, 20L);
-	}
-	
-	private void initWorldBounds() {
-		lobbyBoundId = this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
-																new WorldBoundCheckerLobby(this.getServer(),WORLD_SIZE, WORLD_SIZE),
-																20L, 20L);
-	}
 
 	@EventHandler(priority = EventPriority.HIGH)
 	public void highLogin(PlayerLoginEvent event) {
@@ -285,40 +214,26 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onGameStart(GameStartEvent event) {
-		current_state = GameState.Game;
+		changeState(GameState.Game);
 		teleportPlayers();
-		
-		// Kill lobbyBoundChecker
-		this.getServer().getScheduler().cancelTask(lobbyBoundId);
-		gameBoundId =  this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
-				new WorldBoundCheckerGame(this.getServer(),WORLD_SIZE, WORLD_SIZE, BOUNDS_CHANGE_TIME, BOUNDS_CHANGE_AMOUNT, MINIMUM_WORLD_SIZE),
-				20L, 20L);
-
 	}
-
-	boolean bounds_set = false;
+	
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 
-		
-		//hack to get the bounds set
-		if(!bounds_set){
-			initWorldBounds();
-			bounds_set = true;
-		}
-
 		switch (current_state) {
 		case Lobby:
-		case PreGame:
-
 			/* Creative mode for every newly joined player */
-			Player player = event.getPlayer();
-			player.sendMessage(ChatColor.AQUA + WELCOME_MSG);
-			player.setGameMode(GameMode.CREATIVE);
-
+			event.getPlayer().sendMessage(ChatColor.AQUA + WELCOME_MSG);
+			event.getPlayer().setGameMode(GameMode.CREATIVE);
+			break;
+		case PreGame:
+			event.getPlayer().sendMessage(ChatColor.AQUA + WELCOME_MSG);
+			event.getPlayer().setGameMode(GameMode.CREATIVE);
+			spectators.add(event.getPlayer());
 			break;
 		case Game:
-
+			spectators.add(event.getPlayer());
 			break;
 		default:
 			break;
@@ -366,9 +281,124 @@ public class MC_tehboyz_survival extends JavaPlugin implements Listener {
 			break;
 		}
 	}
+	
+	
+	// Inter-state code put here
+	
+	public void changeState(GameState state){
+		current_state = state;
+		switch(current_state){
+		case Lobby:
+			initLobbyBounds();
+			startDayKeeper();
+			break;
+		case PreGame:
+			for (Player player : world.getPlayers()) {
+				player.sendMessage(ChatColor.AQUA + GAME_START_MSG);
+			}
+			dispatchCounter();
+			break;
+		case Game:
+			// Kill dayKeeper
+			getServer().getScheduler().cancelTask(dayKeeperId);
+			// Kill lobbyBoundChecker
+			getServer().getScheduler().cancelTask(lobbyBoundId);
+			initWorldBounds();
+			
+			break;
+		default:
+			break;
+		}
+	}
 
 	public synchronized GameState getState(){
 		return current_state;
 	}
+	
+	
+	/* ---- Runnable Tasks ----- */
+	
+	private void initLobbyBounds() {
+		lobbyBoundId = this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
+																new WorldBoundCheckerLobby(this.getServer(),WORLD_SIZE, WORLD_SIZE),
+																20L, 20L);
+	}
+	private void initWorldBounds() {
+		gameBoundId =  this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, 
+				new WorldBoundCheckerGame(this.getServer(),WORLD_SIZE, WORLD_SIZE, BOUNDS_CHANGE_TIME, BOUNDS_CHANGE_AMOUNT, MINIMUM_WORLD_SIZE),
+				20L, 20L);
+	}
+	
+	private void dispatchCounter() {
 
+		/* Start new thread used for the game countdown */
+		this.getServer().getScheduler()
+				.scheduleSyncDelayedTask(this, new Runnable() {
+					public void run() {
+
+						int count = COUNTDOWN_SEC;
+						while (count >= 0) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							getServer()
+									.broadcastMessage(
+											ChatColor.AQUA + "" + count--
+													+ " sec left");
+
+						}
+
+						/* Start game after countdown */
+						getServer().broadcastMessage(
+								ChatColor.AQUA + "Game has began!");
+
+						GameStartEvent event = new GameStartEvent(
+								"Game started");
+						getServer().getPluginManager().callEvent(event);
+					}
+				}, 40L);
+	}
+	
+	private void startDayKeeper() {
+		
+		dayKeeperId = getServer().getScheduler().scheduleAsyncRepeatingTask(this,
+				new Runnable(){
+					@Override
+					public void run() {
+						if(world != null && world.getTime() > 8000){
+							world.setTime(6000);
+						}
+					}
+				},
+				20L, 20L);
+	}
+	
+
+	private void readConfig() {
+		config = getConfig();
+		
+		// Read values from config file
+		MAX_PLAYERS = config.getInt("max_players");
+		COUNTDOWN_SEC = config.getInt("countdown_sec");
+		TELEPORT_RADIUS = config.getInt("teleport_radius");
+		WORLD_SIZE = config.getInt("world_size");
+		MINIMUM_WORLD_SIZE = config.getInt("minimum_world_size");
+		
+		List<Integer> spawn_loc = config.getIntegerList("spawn_location");
+		SPAWN_LOCATION = new int[]{spawn_loc.get(0), spawn_loc.get(1), spawn_loc.get(2)};
+		
+		WELCOME_MSG = config.getString("welcome_msg");
+		GAME_START_MSG = config.getString("game_start_msg");
+		
+		BOUNDS_CHANGE_AMOUNT = config.getInt("bounds_change_amount");
+		BOUNDS_CHANGE_TIME = config.getInt("bounds_change_time") *60*1000; // To ms from mins
+		
+		// Set up fields which depend on config values
+		TELEPORT_RADIAN_OFFSET = (float) ((Math.PI * 2) / MAX_PLAYERS);
+		
+		saveDefaultConfig();
+		
+	}
 }
